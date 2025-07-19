@@ -34,15 +34,15 @@ const userSchema = new Schema({
         default: 'user',
     },
     listings: [{
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "listing"
     }],
     bookingList: [{
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "booking"
     }],
     wishList: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "listing"
     },
     refreshToken: {
