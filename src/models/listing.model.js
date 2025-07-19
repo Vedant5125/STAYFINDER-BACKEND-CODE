@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const listingSchema = new Schema({
+const listingSchema = new mongoose.Schema({
     host: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
