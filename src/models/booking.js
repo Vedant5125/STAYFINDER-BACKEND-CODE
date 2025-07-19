@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { listing } from './listing.model';
 
-const bookingSchema = new mongoose.Schema({
+const bookingSchema = new Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
