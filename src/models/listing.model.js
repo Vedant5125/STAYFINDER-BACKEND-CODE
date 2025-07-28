@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, {Schema} from 'mongoose';
 
 const listingSchema = new Schema({
     host: {
@@ -34,7 +34,8 @@ const listingSchema = new Schema({
         required: [true, 'Thumbnail is required']
     },
     supportImage: [{
-        type: String //cloudinary
+        type: String, //cloudinary
+        default: []
     }],
     guest: {
         type: Number,
@@ -45,4 +46,5 @@ const listingSchema = new Schema({
     timestamps: true
 });
 
-export const listing = mongoose.model("listing", listingSchema)
+const Listing = mongoose.model("Listing", listingSchema)
+export default Listing;

@@ -35,16 +35,16 @@ const userSchema = new Schema({
     },
     listings: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "listing"
+        ref: "Listing"
     }],
     bookingList: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "booking"
+        ref: "Booking"
     }],
-    wishList: {
+    wishList: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "listing"
-    },
+        ref: "Listing"
+    }],
     refreshToken: {
         type: String
     }
@@ -57,7 +57,7 @@ userSchema.pre('save', async function(next){
     if(!this.isModified("password")){
         return next();
     }
-    this.passwort = await bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next();
 })
 
@@ -92,4 +92,5 @@ userSchema.methods.refreshAccessToken = function() {
 )
 }
 
-export const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema)
+export default User;

@@ -1,5 +1,4 @@
 import mongoose, { Schema } from 'mongoose';
-import { listing } from './listing.model';
 
 const bookingSchema = new Schema({
     user: {
@@ -9,7 +8,7 @@ const bookingSchema = new Schema({
     },
     listing: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "listing",
+        ref: "Listing",
         required: [true, 'Listing is required']
     },
     checkIn: {
@@ -32,4 +31,5 @@ const bookingSchema = new Schema({
     timestamps: true
 })
 
-export const booking = mongoose.model("booking", bookingSchema)
+const Booking = mongoose.model("Booking", bookingSchema)
+export default Booking;
