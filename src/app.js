@@ -15,6 +15,11 @@ app.use(express.static("public")) // public folder is used to store temporary if
 app.use(cookieParser()) // for cookies
 
 
+//router initialization
+import userRouter from "./routes/user.route.js"
+
+//router declaration
+app.use("/users", userRouter)
 
 
 

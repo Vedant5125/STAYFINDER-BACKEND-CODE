@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const userSchema = new Schema({
-    name: {
+    fullname: {
         type: String,
         required: [true, 'Name is required'],
         trim: true
@@ -25,12 +25,16 @@ const userSchema = new Schema({
         required: [true, 'Phone number is required'],
         trim: true
     },
-    profileImage: {
+    profile: {
         type: String, //cloudinary
+        required: [true, 'Profile image is required']
+    },
+    supportImg: {
+        type: String,
     },
     role:{
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'host'],
         default: 'user',
     },
     listings: [{
