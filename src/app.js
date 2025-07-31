@@ -19,7 +19,7 @@ app.use(cookieParser()) // for cookies
 import userRouter from "./routes/user.route.js"
 
 //router declaration
-app.use("/users", userRouter)
+app.use("/api/users", userRouter)
 
 
 
