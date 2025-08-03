@@ -34,7 +34,7 @@ const listingSchema = new Schema({
         required: [true, 'Thumbnail is required']
     },
     supportImage: [{
-        type: String, //cloudinary
+        type: [String], //cloudinary
         default: []
     }],
     guest: {

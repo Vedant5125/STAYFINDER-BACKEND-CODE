@@ -17,9 +17,11 @@ app.use(cookieParser()) // for cookies
 
 //router initialization
 import userRouter from "./routes/user.route.js"
+import hostRouter from "./routes/host.route.js"
 
 //router declaration
 app.use("/api/users", userRouter)
+app.use("/api/host", hostRouter)
 
 
 

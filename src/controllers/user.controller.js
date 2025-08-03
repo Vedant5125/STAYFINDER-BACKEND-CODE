@@ -38,22 +38,20 @@ const userRegister = asyncHandler(  async(req, res) =>{
     const existingUser = await User.findOne({
         $or: [{ phone }, { email }]
     });
-    if(existingUser){
-        throw new apiError(409, "Username or Email already exists");
+    if(existingUser && (existingUser.role === role)){
+        throw new apiError(409, "Phone or Email already exists for this role");
     }
 
-    console.log(req.files?.profile)
-    console.log(req.files?.supportImg)
     const profileLocalPath = req.files?.profile[0].path;
-    let supportImgLocalPath;
+    // let supportImgLocalPath;
     if(!profileLocalPath){
         throw new apiError(400, "Profile image is required")
     }
-    if(req.files && Array.isArray(req.files.supportImg) && req.files.supportImg.length >0){
-        supportImgLocalPath = req.files?.supportImg[0].path;
-    }
+    // if(req.files && Array.isArray(req.files.supportImg) && req.files.supportImg.length >0){
+    //     supportImgLocalPath = req.files?.supportImg[0].path;
+    // }
     const profile = await uploadImage(profileLocalPath)
-    const supportImg = await uploadImage(supportImgLocalPath)
+    // const supportImg = await uploadImage(supportImgLocalPath)
     if(!profile){
         throw new apiError(400, "Profile image is required")
     }
@@ -65,12 +63,12 @@ const userRegister = asyncHandler(  async(req, res) =>{
         phone,
         role,
         profile: profile.url,
-        supportImg: supportImg?.url || ""
+        // supportImg: supportImg?.url || ""
     })
     const userCreated = await User.findById(user._id).select(
         "-password -refreshToken"
     )
-    console.log("User created in DB")
+    // console.log("User created in DB")
     if(!userCreated){
         throw new apiError(500, "Something went wrong while registering user")
     }
@@ -81,7 +79,7 @@ const userRegister = asyncHandler(  async(req, res) =>{
 })
 
 const loginUser = asyncHandler( async(req, res) =>{
-    const {email, phone, password} = req.body;
+    const {email, phone, password, role} = req.body;
     
     if(!(email || phone)){
         throw new apiError(400, "Email or Phone is required")
@@ -90,8 +88,8 @@ const loginUser = asyncHandler( async(req, res) =>{
     const user = await User.findOne({
         $or: [{email}, {phone}]
     })
-    if(!user){
-        throw new apiError(400, "User does not exist")
+    if(!(user && user.role === role)){
+        throw new apiError(400, "User with provided credentials and role does not exist")
     }
     const validPassword = await user.isPasswordCorrect(password)
     if(!validPassword){
@@ -152,5 +150,46 @@ const logoutUser = asyncHandler( async(req, res) =>{
     )
 })
 
+const refreshAccessToken = asyncHandler( async(req, res) =>{
+    try {
+        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    
+        if(!incomingRefreshToken){
+            throw new apiError(401, "Unauthorized request - error in incomingRefreshToken")
+        }
+    
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+    
+        const user = await User.findById(decodedToken?._id);
+        if(!user){
+            throw new apiError(401, "Invalid Refresh Token");
+        }
+    
+        if(!(incomingRefreshToken === user?.refreshToken)){
+            throw new apiError(401, "Refresh Token is expired or used")
+        }
+    
+        const options = {
+            httpOnly:true,
+            secure:true
+        }
+    
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id);
+    
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken)
+        .cookie("refreshToken", newRefreshToken)
+        .json(new apiResponse(
+            200,
+            {accessToken, newRefreshToken},
+            "Access and refreshed "
+        ))
+    } catch (error) {
+        throw new apiError(401, error?.message || "Invalid refresh token")
+    }
+})
+
+
 export default userRegister; 
-export {loginUser , logoutUser}
+export {loginUser , logoutUser, refreshAccessToken}
