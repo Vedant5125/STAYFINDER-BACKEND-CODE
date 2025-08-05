@@ -71,4 +71,179 @@ const uploadStay = asyncHandler (async (req, res) =>{
     )
 })
 
-export {uploadStay}
+const showHostListings = asyncHandler (async (req, res) =>{
+    const user = await User.findById(req.user?._id);
+    if(!(user && user.role === "host")){
+        throw new apiError(401, "Only hosts are allowed to see host uploaded stays")
+    }
+    const list = await Listing.find({host: user._id});
+    if(!list){
+        throw new apiError(400, "List not found")
+    }
+    if (list.length === 0) {
+        return res
+        .status(200)
+        .json(new apiResponse(
+            200, 
+            [], 
+            "No listings found for this host"
+        ));
+    }
+
+    res
+    .status(200)
+    .json(new apiResponse(
+        200, 
+        list, 
+        "Host's listings fetched"
+    ));
+})
+
+const updateHostList = asyncHandler( async (req, res) =>{
+    const user = await User.findById(req.user?._id)
+    if(!(user && user.role === "host")){
+        throw new apiError(401, "Only hosts are allowed to update listings")
+    }
+    const { id } = req.params;
+    const { title, price, description, location } = req.body;
+    const updateFields = {
+        title,
+        price,
+        description,
+        "location.country": location?.country,
+        "location.city": location?.city,
+        "location.address": location?.address,
+    };
+
+    const list = await Listing.findByIdAndUpdate(
+        { _id: id, host: user.id},
+        {
+            $set:{
+                ...updateFields
+            }
+        },
+        {new: true}
+    )
+    if(!list){
+        throw new apiError(404, "Listing not found or not authorized");
+    }
+
+    return res
+    .status(200)
+    .json(new apiResponse(
+        200, 
+        list, 
+        "Listing updated"
+    ));
+})
+
+const updateThumbnail = asyncHandler( async (req, res) =>{
+    const user = await User.findById(req.user?._id)
+    if(!(user && user.role === "host")){
+        throw new apiError(401, "Only hosts are allowed to update listings thumbnail")
+    }
+    const { id } = req.params;
+    const thumbnailLocalPath = req.file.path;
+    if(!thumbnailLocalPath){
+        throw new apiError(400, "Thumbnail image file is missing")
+    }
+
+    const thumbnail = await uploadImage(thumbnailLocalPath);
+    if(!thumbnail.url){
+        throw new apiError(400, "Error while uploading thumbnail image")
+    }
+
+        const list = await Listing.findByIdAndUpdate(
+        {_id: id, host: req.user?._id},
+        {
+            $set:{
+                thumbnail: thumbnail.url
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new apiResponse(
+        200,
+        list,
+        "thumbnail image updated successfully"
+    ))
+})
+
+const updateSupportImages = asyncHandler( async (req, res) =>{
+    const user = await User.findById(req.user?._id)
+    if(!(user && user.role === "host")){
+        throw new apiError(401, "Only hosts are allowed to update listings thumbnail")
+    }
+    const { id } = req.params;
+
+    if (!req.files || !Array.isArray(req.files.supportImage) || req.files.supportImage.length === 0) {
+        throw new apiError(400, "No support images provided");
+    }
+
+    const uploadedImages = await Promise.all(
+        req.files.supportImage.map(file => uploadImage(file.path))
+    );
+    const imageUrls = uploadedImages.map(img => img.url);
+
+    const list = await Listing.findByIdAndUpdate(
+        {_id: id, host: req.user?._id},
+        {
+            $set: {
+                supportImage: imageUrls
+            }
+        },
+        {new: true}
+    )
+
+    if (!list) {
+        throw new apiError(404, "Listing not found or you're not the host");
+    }
+
+    return res
+    .status(200).
+    json(
+        new apiResponse(
+            200, 
+            list, 
+            "Support images updated successfully"
+        )
+    );
+
+})
+
+const deleteStay = asyncHandler( async (req, res) =>{
+    const user = await User.findById(req.user?._id);
+    if(!(user && user.role === "host")){
+        throw new apiError(401, "Only hosts are allowed to see host uploaded stays")
+    }
+    const { id } = req.params;
+
+    await Listing.findOneAndDelete(
+        {
+            _id: id, 
+            host: req.user?._id
+        }
+    )
+
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200, 
+            {}, 
+            "Stay deleted successfully")
+    );
+})
+
+export {
+    uploadStay,
+    showHostListings,
+    updateHostList,
+    updateThumbnail,
+    updateSupportImages,
+    deleteStay
+}
