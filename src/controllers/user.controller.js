@@ -3,8 +3,9 @@ import User from "../models/user.model.js"
 import uploadImage from "../utils/cloudinary.js"
 import apiError from "../utils/apiError.js"
 import apiResponse from "../utils/apiResponse.js"
+import jwt from "jsonwebtoken"
 
-const generateAccessAndRefreshTokens = async (userId) =>{
+const generateAccessAndRefreshTokens = async(userId) =>{
     try {
         const user = await User.findById(userId)
         if (!user) {
@@ -190,6 +191,106 @@ const refreshAccessToken = asyncHandler( async(req, res) =>{
     }
 })
 
+const getCurrentUser = asyncHandler( async (req, res) =>{
+    return res
+    .status(200)
+    .json(200, req.user, "Current user fetched successfully")
+})
 
-export default userRegister; 
-export {loginUser , logoutUser, refreshAccessToken}
+const updatePassword = asyncHandler( async(req, res) =>{
+    const {oldPassword, newPassword} = req.body;
+    const user = await User.findById(req.user?._id);
+    if(!oldPassword){
+        throw new apiError(400, "Old password is required")
+    }
+    if(!newPassword){
+        throw new apiError(400, "New password is required")
+    }
+
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+    if(!isPasswordCorrect){
+        throw new apiError(400, "Old password is incorrect")
+    }
+
+    user.password = newPassword;
+    await user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(new apiResponse(
+        200,
+        {},
+        "Password changed successfully"
+    ))
+
+})
+
+const updateAccountDetails = asyncHandler( async(req, res) =>{
+    const { fullname, email, phone } = req.body;
+
+    if([ fullname, email, phone ].some((fields) => fields?.trim() === "")){
+        throw new apiError(400, "All fields are required")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                fullname, 
+                email, 
+                phone,
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new apiResponse(
+        200,
+        user,
+        "Updated account detaills successfully"
+    ))
+
+})
+
+const updateprofileImage = asyncHandler( async(req, res) =>{
+    const profileLocalPath = req.file.path;
+    if(!profileLocalPath){
+        throw new apiError(400, "Profile image file is missing")
+    }
+
+    const profile = await uploadImage(profileLocalPath);
+    if(!profile.url){
+        throw new apiError(400, "Error while uploading profile image")
+    }
+
+        const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                profile: profile.url
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new apiResponse(
+        200,
+        user,
+        "Profile image updated successfully"
+    ))
+})
+
+export {
+    userRegister,
+    loginUser, 
+    logoutUser, 
+    refreshAccessToken,
+    getCurrentUser,
+    updatePassword,
+    updateAccountDetails,
+    updateprofileImage,
+}
