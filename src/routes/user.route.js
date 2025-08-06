@@ -12,6 +12,7 @@ import { userRegister,
     showWishList,
     removeFromWishList
 } from "../controllers/user.controller.js"
+import { getBookedDates, bookStay } from "../controllers/booking.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 const router = Router()
@@ -32,6 +33,8 @@ router.route("/updateprofileImage").post(
 router.route("/addToWishlist").post(verifyJWT, addToWishlist);
 router.route("/showWishList").post(verifyJWT, showWishList);
 router.route("/removeFromWishList").post(verifyJWT, removeFromWishList);
+router.route("/getBookedDates/:id").get(verifyJWT, getBookedDates);
+router.route("/bookStay/:id").post(verifyJWT, bookStay);
 
 
 export default router
