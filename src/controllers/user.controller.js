@@ -1,5 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import User from "../models/user.model.js"
+import Listing from "../models/listing.model.js"
 import uploadImage from "../utils/cloudinary.js"
 import apiError from "../utils/apiError.js"
 import apiResponse from "../utils/apiResponse.js"
@@ -284,6 +285,81 @@ const updateprofileImage = asyncHandler( async(req, res) =>{
     ))
 })
 
+const addToWishlist = asyncHandler( async(req, res) =>{
+    const user = await User.findById(req.user?._id); 
+    const {listingId} = req.body;
+    if(!(user && user.role === "user")){
+        throw new apiError(401, "User not found or host can't add to wishlist");
+    }
+    if(!listingId){
+        throw new apiError(401, "Listing not found");
+    }
+
+    if (user.wishList.includes(listingId)) {
+        throw new apiError(400, "Listing already in wishlist");
+    }
+
+    user.wishList.push(listingId);
+    await user.save();
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200, listingId, "Listing added to wishlist")
+    )
+})
+
+const showWishList = asyncHandler( async(req, res) =>{
+    const user = await User.findById(req.user?._id); 
+    if (!user.wishList || user.wishList.length === 0) {
+        return res
+        .status(200)
+        .json(
+            new apiResponse(200, [], "No items in wishlist")
+        );
+    }
+
+    const listings = await Listing.find(
+        { _id: { $in: user.wishList } }
+    ).select("title description thumbnail price location type supportImage guest host");
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200, listings, "wishLists fetched successfully")
+    )
+})
+
+const removeFromWishList = asyncHandler( async(req, res) =>{
+    const { listingId } = req.body;
+    console.log(listingId)
+    if (!listingId) {
+        throw new apiError(400, "Listing not found");
+    }
+    const user = await User.findById(req.user?._id); 
+    if (!user.wishList || user.wishList.length === 0) {
+        return res
+        .status(200)
+        .json(
+            new apiResponse(200, [], "No items in wishlist")
+        );
+    }
+
+    const list = await User.findByIdAndUpdate(
+        {_id: user.id},
+        {
+            $pull: { wishList: listingId }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200, list, "Listing removed from wishlist")
+    )
+})
+
 export {
     userRegister,
     loginUser, 
@@ -293,4 +369,7 @@ export {
     updatePassword,
     updateAccountDetails,
     updateprofileImage,
+    addToWishlist,
+    showWishList,
+    removeFromWishList
 }

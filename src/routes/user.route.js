@@ -1,6 +1,17 @@
 import {Router} from "express"
 import upload from "../middlewares/multer.middleware.js"
-import { userRegister, loginUser, logoutUser, refreshAccessToken, getCurrentUser, updatePassword, updateAccountDetails, updateprofileImage } from "../controllers/user.controller.js"
+import { userRegister, 
+    loginUser, 
+    logoutUser, 
+    refreshAccessToken, 
+    getCurrentUser, 
+    updatePassword, 
+    updateAccountDetails, 
+    updateprofileImage, 
+    addToWishlist, 
+    showWishList,
+    removeFromWishList
+} from "../controllers/user.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 const router = Router()
@@ -18,6 +29,9 @@ router.route("/updateprofileImage").post(
     verifyJWT,
     upload.single("profile"), 
     updateprofileImage);
+router.route("/addToWishlist").post(verifyJWT, addToWishlist);
+router.route("/showWishList").post(verifyJWT, showWishList);
+router.route("/removeFromWishList").post(verifyJWT, removeFromWishList);
 
 
 export default router
