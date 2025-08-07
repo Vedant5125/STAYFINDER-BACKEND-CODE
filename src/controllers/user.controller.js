@@ -371,5 +371,5 @@ export {
     updateprofileImage,
     addToWishlist,
     showWishList,
-    removeFromWishList
+    removeFromWishList,
 }

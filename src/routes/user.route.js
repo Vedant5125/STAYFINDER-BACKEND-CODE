@@ -10,7 +10,7 @@ import { userRegister,
     updateprofileImage, 
     addToWishlist, 
     showWishList,
-    removeFromWishList
+    removeFromWishList,
 } from "../controllers/user.controller.js"
 import { getBookedDates, bookStay } from "../controllers/booking.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"

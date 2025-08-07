@@ -18,10 +18,12 @@ app.use(cookieParser()) // for cookies
 //router initialization
 import userRouter from "./routes/user.route.js"
 import hostRouter from "./routes/host.route.js"
+import listingRouter from "./routes/listing.route.js"
 
 //router declaration
 app.use("/api/users", userRouter)
 app.use("/api/host", hostRouter)
+app.use("/api/listing", listingRouter)
 
 
 
