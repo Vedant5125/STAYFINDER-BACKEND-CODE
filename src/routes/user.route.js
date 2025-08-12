@@ -12,7 +12,7 @@ import { userRegister,
     showWishList,
     removeFromWishList,
 } from "../controllers/user.controller.js"
-import { getBookedDates, bookStay } from "../controllers/booking.controller.js"
+import { getBookedDates, bookStay, getAllBookings } from "../controllers/booking.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 const router = Router()
@@ -23,7 +23,7 @@ router.route("/register").post(
 router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
-router.route("/getCurrentUser").post(verifyJWT, getCurrentUser);
+router.route("/getCurrentUser").get(verifyJWT, getCurrentUser);
 router.route("/updatePassword").post(verifyJWT, updatePassword);
 router.route("/updateAccountDetails").post(verifyJWT, updateAccountDetails);
 router.route("/updateprofileImage").post(
@@ -35,6 +35,7 @@ router.route("/showWishList").post(verifyJWT, showWishList);
 router.route("/removeFromWishList").post(verifyJWT, removeFromWishList);
 router.route("/getBookedDates/:id").get(verifyJWT, getBookedDates);
 router.route("/bookStay/:id").post(verifyJWT, bookStay);
+router.route("/bookings").get(verifyJWT, getAllBookings);
 
 
 export default router

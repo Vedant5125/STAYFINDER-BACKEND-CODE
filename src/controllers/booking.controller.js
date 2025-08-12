@@ -65,4 +65,13 @@ const bookStay = asyncHandler( async(req, res) =>{
 
 })
 
-export { getBookedDates, bookStay }
+const getAllBookings = asyncHandler(async(req, res) =>{
+    const userId = req.user._id;
+    const bookings = await Booking.find({ user: userId }).populate('listing');
+    console.log(bookings);
+    return res
+        .status(200)
+        .json(new apiResponse(200, bookings, "User bookings fetched successfully"));
+})
+
+export { getBookedDates, bookStay, getAllBookings }

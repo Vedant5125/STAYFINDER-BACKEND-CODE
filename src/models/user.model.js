@@ -71,12 +71,12 @@ userSchema.methods.generateAccessToken = function(){
     return jwt.sign({
             _id: this._id,
             email: this.email,
-            username: this.username,
+            phone: this.phone,
             fullname: this.fullname,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "1d"
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1d"
         }
     )
 }
@@ -87,7 +87,7 @@ userSchema.methods.generateRefreshToken = function(){
             },
             process.env.REFRESH_TOKEN_SECRET,
             {
-                expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || "1d"
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "1d"
             }
         )
 }
