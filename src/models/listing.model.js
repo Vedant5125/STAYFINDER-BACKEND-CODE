@@ -33,10 +33,10 @@ const listingSchema = new Schema({
         type: String, //cloudinary
         required: [true, 'Thumbnail is required']
     },
-    supportImage: [{
+    supportImage: {
         type: [String], //cloudinary
         default: []
-    }],
+    },
     guest: {
         type: Number,
         required: [true, 'Number of guests is required'],

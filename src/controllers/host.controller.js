@@ -99,6 +99,27 @@ const showHostListings = asyncHandler (async (req, res) =>{
     ));
 })
 
+const getListingById = asyncHandler( async(req, res) =>{
+    const user = req.user?._id;
+    const { id } = req.params;
+
+    const listing = await Listing.findOne({
+        _id: id, host: user
+    })
+
+    if (!listing) {
+        throw new apiError(404, "Listing not found or you don't have permission");
+    }
+
+    return res.status(200).json(
+        new apiResponse(
+        200,
+        listing,
+        "Listing fetched successfully"
+        )
+    );
+})
+
 const updateHostList = asyncHandler( async (req, res) =>{
     const user = await User.findById(req.user?._id)
     if(!(user && user.role === "host")){
@@ -245,5 +266,6 @@ export {
     updateHostList,
     updateThumbnail,
     updateSupportImages,
-    deleteStay
+    deleteStay,
+    getListingById
 }
