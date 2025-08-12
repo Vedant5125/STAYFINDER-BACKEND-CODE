@@ -18,7 +18,7 @@ import verifyJWT from "../middlewares/auth.middleware.js"
 const router = Router()
 
 router.route("/register").post(
-    upload.single("profile"),
+    upload.fields([{ name: "profile", maxCount: 1 }]),
     userRegister);
 router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);

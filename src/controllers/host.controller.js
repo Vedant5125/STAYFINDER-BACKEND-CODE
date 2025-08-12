@@ -4,6 +4,7 @@ import Listing from "../models/listing.model.js";
 import User from "../models/user.model.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
+import {generateDescriptionWithGemini} from "../utils/gemini.js";
 
 const uploadStay = asyncHandler (async (req, res) =>{
     const user = await User.findOne(req.user._id);
@@ -260,6 +261,35 @@ const deleteStay = asyncHandler( async (req, res) =>{
     );
 })
 
+const generateDescriptionController = asyncHandler( async (req, res) =>{
+    const { title, location, type, guest, attributes } = req.body;
+    if (!attributes) {
+        throw new apiError(400, "Key attributes are required for AI generation.");
+    }
+
+    const prompt = `
+        Generate a compelling and detailed listing description for a rental property based on the following details and key attributes. Make the tone inviting and professional.
+        
+        Property Details:
+        - Title: ${title}
+        - Location: ${location.city}, ${location.country}
+        - Type: ${type}
+        - Guests: Up to ${guest}
+        - Key Attributes: ${attributes}
+        
+        Please write a description that is between 50 and 100 words long.
+    `;
+
+    try {
+        const aiDescription = await generateDescriptionWithGemini(prompt);
+        return res.status(200).json(
+            new apiResponse(200, { description: aiDescription }, "Description generated successfully")
+        );
+    }catch (error) {
+        throw new apiError(500, error.message);
+    }
+})
+
 export {
     uploadStay,
     showHostListings,
@@ -267,5 +297,6 @@ export {
     updateThumbnail,
     updateSupportImages,
     deleteStay,
-    getListingById
+    getListingById,
+    generateDescriptionController
 }

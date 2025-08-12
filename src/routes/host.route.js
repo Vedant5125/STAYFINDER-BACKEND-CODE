@@ -1,7 +1,7 @@
 import {Router} from "express"
 import upload from "../middlewares/multer.middleware.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
-import {uploadStay, showHostListings, updateHostList, updateThumbnail, updateSupportImages, deleteStay, getListingById } from "../controllers/host.controller.js"
+import {uploadStay, showHostListings, updateHostList, updateThumbnail, updateSupportImages, deleteStay, getListingById, generateDescriptionController } from "../controllers/host.controller.js"
 
 const router = Router()
 
@@ -35,5 +35,6 @@ router.route("/updateSupportImages/:id").put(
         ]),
     updateSupportImages)
 router.route("/deleteStay/:id").delete(verifyJWT, deleteStay)
+router.route("/generateDescription").post(verifyJWT, generateDescriptionController);
 
 export default router
