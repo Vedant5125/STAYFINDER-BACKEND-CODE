@@ -13,7 +13,11 @@ const getAllListings = asyncHandler(async (req, res) => {
 
 const listingDetails = asyncHandler( async(req, res) =>{
     const { id } = req.params;
-    const list = await Listing.findById(id).select("-__v");
+    const list = await Listing.findById(id).select("-__v")
+        .populate({
+            path: 'host',
+            select: 'fullname'
+        });
     return res
     .status(200)
     .json(
